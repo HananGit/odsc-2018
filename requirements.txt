@@ -1,7 +1,0 @@
-pandas==0.22.0
-sacredboard==0.4.0
-pymongo==3.6.1
-sacred==0.7.2
-numpy==1.14.2
-scikit_learn==0.19.1
-scipy==1.0.1
