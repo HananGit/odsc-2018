@@ -22,8 +22,8 @@ Demonstrate how to use Sacred to track machine learning experiments on popular k
 
 ### Running an experiment with all defaults
 `python model_pipeline.py`
-Notice that different runs yield different results since we havn't controlled 
-the random seed.
+Notice that different runs yield different results since we have not  
+controlled the random seed.
 
 But if we fix the seed by running:
 `python model_pipeline.py seed=0`
