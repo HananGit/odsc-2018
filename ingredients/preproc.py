@@ -10,7 +10,7 @@ def cfg():
 
 
 @preprocess_ingredient.named_config
-def variant_preprocess_data():
+def variant_simple():
     features = ['Fare', 'SibSp']
 
 
