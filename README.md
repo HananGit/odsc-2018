@@ -20,8 +20,24 @@ Demonstrate how to use Sacred to track machine learning experiments on popular k
 
 ## Run Experiment
 
+### Running an experiment with all defaults
+`python model_pipeline.py`
+Notice that different runs yield different results since we have not  
+controlled the random seed.
+
+But if we fix the seed by running:
+`python model_pipeline.py seed=0`
+we should end up with the same results on every run.
+
+### Running a variant
+We defined a `variant_simple` in our 
+[preprocessing ingredient](ingredients/preproc.py). To run this variant:
+`python model_pipeline.py with preprocess.variant_simple seed=0`
+
+### Running with a mongo observer
 0. Launch local mongo instance: `mongod`
-1. Run Experiment (result will be stored in `sacred` database in mongo): `python model_pipeline.py -m sacred`
+1. Run Experiment (result will be stored in `sacred` database in mongo): 
+`python model_pipeline.py -m sacred`
 
 ## See Results
 
