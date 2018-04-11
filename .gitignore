@@ -1,6 +1,8 @@
 sacred-demo*
 .DS_Store
 .idea/
+saved/*
+!saved/.gitkeep
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

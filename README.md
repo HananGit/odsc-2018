@@ -42,3 +42,9 @@ We defined a `variant_simple` in our
 ## See Results
 
 Start local Sacredboard server and connect to local MongoDB instance listening on 27017, database name `sacred`: `sacredboard -m sacred`
+
+
+# References
+- [sacred](https://github.com/IDSIA/sacred) [(pub)](http://ml.informatik.uni-freiburg.de/papers/17-SciPy-Sacred.pdf)
+- [sacredboard](https://github.com/chovanecm/sacredboard)
+- [Kaggle Titanic](https://www.kaggle.com/c/titanic)
