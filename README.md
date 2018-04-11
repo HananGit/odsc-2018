@@ -41,6 +41,15 @@ We defined a `variant_simple` in our
 
 ## See Results
 
+### Mongo
+To look at all our runs on mongo:
+```
+mongo
+use sacred
+db.runs.find().pretty()
+```
+
+### Sacredboard
 Start local Sacredboard server and connect to local MongoDB instance listening on 27017, database name `sacred`: `sacredboard -m sacred`
 
 
