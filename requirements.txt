@@ -5,3 +5,5 @@ sacred==0.7.2
 numpy==1.14.2
 scikit_learn==0.19.1
 scipy==1.0.1
+hyperopt==0.1
+networkx==1.11 #https://github.com/hyperopt/hyperopt/issues/325
