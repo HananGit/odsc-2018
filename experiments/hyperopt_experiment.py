@@ -4,22 +4,20 @@ Based on:
 2. https://github.com/Lab41/pythia/blob/master/experiments/hyperopt_experiments.py
 """
 
-import hyperopt
-from hyperopt import fmin, tpe, hp,Trials
+from hyperopt import fmin, tpe, hp, Trials
 from model_accuracy import run as run_titanic, ex as titanic_experiment
 from sacred import Experiment
 from sacred.observers import MongoObserver
 from sacred.initialize import Scaffold
 import argparse
-import numpy as np
-import pickle
+
+titanic = 'titantic'  # Misspelled titanic in model_accuracy
 
 
-titanic = 'titantic' #because i misspelled titanic in model_accuracy
 def objective(titanic_args):
     """
-    :param titantic_args:
-    :return:
+    :param titanic_args:
+    :return: result: This is -1*metric, which is accuracy in this case.
     """
 
     # arguments to pass as config_updates dict
@@ -29,8 +27,7 @@ def objective(titanic_args):
     # command-line arguments
     global parse_args
 
-
-    ex = Experiment('Hyperopt',ingredients=[titanic_experiment])
+    ex = Experiment('Hyperopt', ingredients=[titanic_experiment])
     ex.observers.append(MongoObserver.create(url=parse_args.mongo_db_address, db_name=parse_args.mongo_db_name))
 
     args = titanic_args
@@ -38,32 +35,40 @@ def objective(titanic_args):
 
     r = ex.run(config_updates=titanic_args)
 
-    #print("Config: ",r.config) #sanity check
+    # print("Config: ",r.config) #sanity check
 
     return result
 
 
 def run_titanic_with_global_args():
+    """
+    Runs titanic experiment, sets global result for hyperopt to use in it's param space search. returns accuracy to
+    sacred.
+    :return: accuracy
+    """
     global args
     global result
 
     try:
         # TODO: will update this later to pass in just the params dealing with a particular model, or the model itself
         # will have to make some changes to experiments/model_accuracy.py, the config and main.
-        all_results = run_titanic(args[titanic]['penalty'],args[titanic]['fit_intercept'])
+        accuracy = run_titanic(args[titanic]['penalty'], args[titanic]['fit_intercept'])
 
         # For Hyperopt: multiply accuracy * -1 for hyperopt fmin
-        result = -all_results
+        result = -accuracy
 
         # For Sacred: Return all_results for sacred
-        return all_results
+        return accuracy
     except:
         # Have sacred log a null result
         return None
 
 
 def run_titanic_hyperopt():
-    # Define the space for titantic search
+    """
+    Runs titanic hyperopt experiments. Defines the space for titanic parameter search and runs experiments.
+    :return: trials: performance on each trial run, and optimal_run: the best run
+    """
     # Parameters for each Ingredient
     space = {
         # Set Seed to 0 to make consistent for all HPO runs
@@ -71,19 +76,20 @@ def run_titanic_hyperopt():
 
 
         # Data Ingredient: train_dataset
-        'train_dataset': {"filename":"data/train.csv",
-                            "target": 'Survived',
-                            "split_size": .75
+        'train_dataset': {
+            "filename": "data/train.csv",
+            "target": 'Survived',
+            "split_size": .75
                           },
         # Preprocess Ingredient: preprocess
         'preprocess': {
-            "features": hp.choice("features",[['Fare','SibSp'],['Fare', 'SibSp', 'Parch']]),
+            "features": hp.choice("features", [['Fare', 'SibSp'], ['Fare', 'SibSp', 'Parch']]),
         },
 
         # Experiment: titanic
         titanic: {
-            "fit_intercept":hp.choice('fit_intercept', [True, False]),
-            "penalty":hp.choice('penalty', ["l1", "l2"])
+            "fit_intercept": hp.choice('fit_intercept', [True, False]),
+            "penalty": hp.choice('penalty', ["l1", "l2"])
         }
     }
 
@@ -92,8 +98,10 @@ def run_titanic_hyperopt():
     optimal_run = fmin(objective,
                        space,
                        algo=tpe.suggest,
-                       max_evals= parse_args.num_runs,
+                       max_evals=parse_args.num_runs,
                        trials=trials)
+
+    return trials, optimal_run
 
 if __name__ == '__main__':
     """
@@ -102,13 +110,12 @@ if __name__ == '__main__':
     To run pass in the number of hyperopt runs, the mongo db address and name
 
     Generic:
-        python experiments/hyperopt_experiments.py NUM_RUNS MONGO_HOST:MONGO_PORT MONGO_SACRED_COLLECTION
+        python experiments/hyperopt_experiment.py NUM_RUNS MONGO_HOST:MONGO_PORT MONGO_SACRED_COLLECTION
 
     For 5 tests to local mongo instance with collection named sacred:
-        python experiments/hyperopt_experiments.py 5 127.0.0.1:27017 sacred
+        python experiments/hyperopt_experiment.py 5 127.0.0.1:27017 sacred
 
     """
-
 
     parser = argparse.ArgumentParser(description="Titanic Hyperopt Tests logging to Sacred")
     parser.add_argument("num_runs", type=int, help="Number of Hyperopt Runs")
@@ -118,7 +125,7 @@ if __name__ == '__main__':
     global parse_args
     parse_args = parser.parse_args()
 
-    if int(parse_args.num_runs)<=0:
+    if int(parse_args.num_runs) <= 0:
         print("Must have more than one run")
 
     # Monkey patch to avoid having to declare all our variables
