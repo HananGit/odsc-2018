@@ -1,6 +1,7 @@
-import uuid
+import os
 import numpy as np
 import pandas as pd
+import tempfile
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, roc_auc_score
 from sacred import Experiment
@@ -43,18 +44,22 @@ def run(penalty, fit_intercept, save_probs, save_submission):
 
     # Export predictions
     if save_probs:
-        path_save_probs = f'./saved/{str(uuid.uuid4())}.npy'
-        np.save(path_save_probs, pred_prob_test[:, 1])
-        ex.add_artifact(path_save_probs, name='predictions')
+        f_tmp = tempfile.NamedTemporaryFile(delete=False)
+        np.save(f_tmp, pred_prob_test[:, 1])
+        f_tmp.close()
+        ex.add_artifact(f_tmp.name, name='predictions')
+        os.remove(f_tmp.name)
 
     if save_submission:
+        f_tmp = tempfile.NamedTemporaryFile(mode='w', delete=False)
         sub_df = pd.DataFrame(
             pred_lbl_test,
             index=pd.Index(x_test.index, name='PassengerId'),
             columns=['Survived'])
-        path_save_sub = f'./saved/{str(uuid.uuid4())}.csv'
-        sub_df.to_csv(path_save_sub, header=True, index=True)
-        ex.add_artifact(path_save_sub, name='submission')
+        sub_df.to_csv(f_tmp, header=True, index=True)
+        f_tmp.close()
+        ex.add_artifact(f_tmp.name, name='submission')
+        os.remove(f_tmp.name)
 
     return score
 
