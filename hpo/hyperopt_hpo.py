@@ -1,4 +1,4 @@
-from experiments.model_accuracy import run as run_titanic, ex as titanic_experiment
+from experiments.model_accuracy import ex as titanic_experiment
 from sacred import Experiment
 from sacred.observers import MongoObserver
 from sacred.initialize import Scaffold
@@ -18,16 +18,14 @@ class HyperoptHPO(object):
     # replaces the "result" global
     result = None
 
-    def __init__(self, base_experiment_name, base_experiment, base_experiment_main, command_line_args, param_space):
+    def __init__(self, base_experiment, command_line_args, param_space):
         """Create a new HyperoptHPO object to run HPO over a Sacred experiment
 
         :param base_experiment: Experiment, required
         :param command_line_args: args, required
         :param param_space: dict, required
         """
-        self.base_experiment_name = base_experiment_name
         self.base_experiment = base_experiment
-        self.base_experiment_main = base_experiment_main
         # replace the parse_args global
         self.mongo_url = command_line_args.mongo_db_address
         self.mongo_db = command_line_args.mongo_db_name
@@ -35,45 +33,19 @@ class HyperoptHPO(object):
         self.param_space = param_space
 
         # initialize Experiment
-        self.hyperopt_exp = Experiment('Hyperopt', ingredients=[self.base_experiment])
-        self.hyperopt_exp.observers.append(MongoObserver.create(url=self.mongo_url,
-                                                                db_name=self.mongo_db))
+        self.hyperopt_exp = Experiment('Hyperopt',
+                                       ingredients=[self.base_experiment])
+        self.hyperopt_exp.observers.append(
+            MongoObserver.create(url=self.mongo_url, db_name=self.mongo_db))
 
     def objective(self, experiment_args):
-        """
-        :param titanic_args:
-        :return: result: This is -1*metric, which is accuracy in this case.
-        """
-
         self.experiment_config = experiment_args
-        self.hyperopt_exp.main(self.run_base_experiment)
-
-        r = self.hyperopt_exp.run(config_updates=self.experiment_config)
+        run_obj = self.base_experiment.run(
+            config_updates=self.experiment_config)
 
         # print("Config: ",r.config) #sanity check
 
-        return self.result
-
-    def run_base_experiment(self):
-        """
-        Replaces run_titanic_with_global_args
-        :return: accuracy
-        """
-
-        try:
-            # TODO: will update this later to pass in just the params dealing with a particular model, or the model itself
-            # will have to make some changes to experiments/model_accuracy.py, the config and main.
-            accuracy = self.base_experiment_main(self.experiment_config[self.base_experiment_name]['penalty'],
-                                             self.experiment_config[self.base_experiment_name]['fit_intercept'])
-
-            # For Hyperopt: multiply accuracy * -1 for hyperopt fmin
-            self.result = -accuracy
-
-            # For Sacred: Return all_results for sacred
-            return accuracy
-        except:
-            # Have sacred log a null result
-            return None
+        return - run_obj.result
 
     def run_hyperopt(self):
         """
@@ -83,13 +55,15 @@ class HyperoptHPO(object):
 
         trials = Trials()
         # main hyperopt fmin function
-        optimal_run = fmin(self.objective,
-                           self.param_space,
-                           algo=tpe.suggest,
-                           max_evals=self.num_runs,
-                           trials=trials)
+        optimal_run = fmin(
+            self.objective,
+            self.param_space,
+            algo=tpe.suggest,
+            max_evals=self.num_runs,
+            trials=trials)
 
         return trials, optimal_run
+
 
 if __name__ == '__main__':
     """
@@ -144,9 +118,7 @@ if __name__ == '__main__':
         }
     }
 
-    hyperopt_exps = HyperoptHPO(base_experiment_name='titantic',
-                                base_experiment=titanic_experiment,
-                                base_experiment_main=run_titanic,
+    hyperopt_exps = HyperoptHPO(base_experiment=titanic_experiment,
                                 command_line_args=parse_args,
                                 param_space=space)
 
