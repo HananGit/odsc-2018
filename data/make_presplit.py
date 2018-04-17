@@ -13,8 +13,8 @@ if __name__ == '__main__':
     tsplit_df, vsplit_df = train_test_split(
         train_df, test_size=0.25, random_state=0)
 
-    tsplit_df.to_csv('data/train_presplit.csv', index=True, header=True)
-    vsplit_df.to_csv('data/val_presplit.csv', index=True, header=True)
+    tsplit_df.to_csv('data/train_presplit.csv', index=False, header=True)
+    vsplit_df.to_csv('data/val_presplit.csv', index=False, header=True)
 
 
 
