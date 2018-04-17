@@ -16,4 +16,4 @@ def variant_simple():
 
 @preprocess_ingredient.capture
 def preprocess_data(df, features):
-    return df[features]
+    return df[features].fillna(0.)
