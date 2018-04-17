@@ -59,7 +59,7 @@ def run(penalty, fit_intercept, C,
     clf_lg.fit(preprocess_data(x_train), y_train)
 
     # Test Predictions
-    if not (x_test is None or y_test is None):
+    if x_test is not None:
         pred_prob_test = clf_lg.predict_proba(preprocess_data(x_test))
         pred_lbl_test = pred_prob_test.argmax(axis=1)
 
@@ -94,7 +94,7 @@ def run(penalty, fit_intercept, C,
                 pred_prob_val[:, 1],
                 index=pd.Index(x_val.index, name='PassengerId'),
                 columns=['pred_proba'])
-            prob_df['Survived'] = y_test
+            prob_df['Survived'] = y_val
             df_artifact(ex, prob_df, 'holdout_predictions')
 
         return score_val

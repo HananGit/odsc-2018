@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sacred import Ingredient
+from ingredients.data_smoothie import gather_stage0_features
 
 
 data_ingredient = Ingredient('dataset')
@@ -15,6 +16,8 @@ def cfg():
     path_test = 'data/test.csv'
     target = 'Survived'
     split_size = None
+
+    blended = False
 
 
 @data_ingredient.named_config
@@ -41,8 +44,29 @@ def variant_production():
     path_test = f's3://bucket/date={today}/data.csv'
 
 
+@data_ingredient.named_config
+def blend():
+    """Blend of predictions from our top 3 models
+    Example:
+        ```
+        python experiments/model_accuracy2.py -m sacred with \
+        variant_rand_params dataset.blend preprocess.variant_all \
+        save_submission=True
+        ```
+    """
+    path_train = None
+    path_val = None
+    path_test = None
+    blended = True
+
+
 @data_ingredient.capture
-def load_data(path_train, path_val, path_test, target, split_size=None):
+def load_data(path_train, path_val, path_test, target, split_size=None,
+              blended=False,):
+
+    if blended:
+        return gather_stage0_features(target)
+
     train_df = pd.read_csv(path_train)
     test_df = pd.read_csv(path_test)
     feature_cols = [i for i in train_df.columns if i != target]
