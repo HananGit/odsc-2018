@@ -55,9 +55,9 @@ def run(penalty, fit_intercept, save_probs, save_submission):
     # Export predictions
     if save_probs:
         prob_df = pd.DataFrame(
-            pred_lbl_test,
+            pred_prob_test[:, 1],
             index=pd.Index(x_test.index, name='PassengerId'),
-            columns=['pred'])
+            columns=['pred_proba'])
         prob_df['Survived'] = y_test
         df_artifact(ex, prob_df, 'predictions')
 
