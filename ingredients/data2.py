@@ -9,6 +9,7 @@ data_ingredient = Ingredient('dataset')
 
 @data_ingredient.config
 def cfg():
+    """Default config"""
     path_train = 'data/train.csv'
     path_test = 'data/test.csv'
     target = 'Survived'
@@ -16,7 +17,17 @@ def cfg():
 
 
 @data_ingredient.named_config
+def variant_presplit():
+    """Predetermined constant split"""
+    path_train = 'data/train_presplit.csv'
+    path_test = 'data/val_presplit.csv'
+
+
+@data_ingredient.named_config
 def variant_split():
+    """
+    Split training set on runtime
+    """
     split_size = 0.75
 
 
