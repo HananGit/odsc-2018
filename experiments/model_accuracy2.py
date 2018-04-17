@@ -22,6 +22,7 @@ def cfg():
     """
     penalty = 'l2'
     fit_intercept = False
+    C = 1.0
     save_probs = True
     save_submission = False
 
@@ -30,6 +31,7 @@ def cfg():
 def variant_rand_params():
     penalty = np.random.choice(['l1', 'l2'])
     fit_intercept = np.random.randint(2, dtype=bool)
+    C = np.exp(np.random.randn() * 5)
 
 
 def df_artifact(ex, df, name=None):
@@ -43,36 +45,61 @@ def df_artifact(ex, df, name=None):
 
 
 @ex.automain
-def run(penalty, fit_intercept, save_probs, save_submission):
+def run(penalty, fit_intercept, C,
+        save_probs, save_submission):
     data_d = load_data()
     x_train, y_train = data_d['train']
-    x_test, y_test = data_d['test']
+    x_val, y_val = data_d.get('val', (None, None))
+    x_test, y_test = data_d.get('test', (None, None))
 
-    clf_lg = LogisticRegression(penalty=penalty, fit_intercept=fit_intercept)
+    clf_lg = LogisticRegression(
+        penalty=penalty, fit_intercept=fit_intercept, C=C,
+    )
 
     clf_lg.fit(preprocess_data(x_train), y_train)
 
-    pred_prob_test = clf_lg.predict_proba(preprocess_data(x_test))
-    pred_lbl_test = pred_prob_test.argmax(axis=1)
+    # Test Predictions
+    if not (x_test is None or y_test is None):
+        pred_prob_test = clf_lg.predict_proba(preprocess_data(x_test))
+        pred_lbl_test = pred_prob_test.argmax(axis=1)
 
-    score = accuracy_score(y_test, pred_lbl_test)
-    # score = roc_auc_score(y_test, pred_prob_test[:, 1])
+        # Export prob predictions
+        if save_probs:
+            # Val
+            prob_df = pd.DataFrame(
+                pred_prob_test[:, 1],
+                index=pd.Index(x_test.index, name='PassengerId'),
+                columns=['pred_proba'])
+            prob_df['Survived'] = y_test
+            df_artifact(ex, prob_df, 'test_predictions')
 
-    # Export predictions
-    if save_probs:
-        prob_df = pd.DataFrame(
-            pred_prob_test[:, 1],
-            index=pd.Index(x_test.index, name='PassengerId'),
-            columns=['pred_proba'])
-        prob_df['Survived'] = y_test
-        df_artifact(ex, prob_df, 'predictions')
+        # Export submission
+        if save_submission:
+            sub_df = pd.DataFrame(
+                pred_lbl_test,
+                index=pd.Index(x_test.index, name='PassengerId'),
+                columns=['Survived'])
+            df_artifact(ex, sub_df, 'test_submission')
 
-    if save_submission:
-        sub_df = pd.DataFrame(
-            pred_lbl_test,
-            index=pd.Index(x_test.index, name='PassengerId'),
-            columns=['Survived'])
-        df_artifact(ex, sub_df, 'submission')
+    # Validation Predictions
+    if not (x_val is None or y_val is None):
+        pred_prob_val = clf_lg.predict_proba(preprocess_data(x_val))
+        pred_lbl_val = pred_prob_val.argmax(axis=1)
+        score_val = accuracy_score(y_val, pred_lbl_val)
 
-    return score
+        # Export prob predictions
+        if save_probs:
+            # Val
+            prob_df = pd.DataFrame(
+                pred_prob_val[:, 1],
+                index=pd.Index(x_val.index, name='PassengerId'),
+                columns=['pred_proba'])
+            prob_df['Survived'] = y_test
+            df_artifact(ex, prob_df, 'holdout_predictions')
+
+        return score_val
+
+    else:
+
+        return None
 
