@@ -30,14 +30,20 @@ But if we fix the seed by running:
 we should end up with the same results on every run.
 
 ### Running a variant
-We defined a `variant_simple` in our 
-[preprocessing ingredient](ingredients/preproc.py). To run this variant:
-```python model_pipeline.py with preprocess.variant_simple seed=0```
+
+#### Variants in experiment
+To run a different variant of our experiment:
+```python experiments/model_accuracy2.py print_config with variant_rand_params```
 
 Similarly, we have a config option called `save_submission` which is `False`
 by default. We can turn it on from the CLI, which causes a submission file
 to be generated and tracked as an artifact.
 ```python model_pipeline.py with seed=0 save_submission=True```
+
+#### Variants in ingredients
+We also defined a `variant_simple` in our
+[preprocessing ingredient](ingredients/preproc.py). To run this variant:
+```python model_pipeline.py with preprocess.variant_simple seed=0```
 
 We can even use `print_config` to show a dry run of config and what's changed
 from the default

@@ -26,6 +26,12 @@ def cfg():
     save_submission = False
 
 
+@ex.named_config
+def variant_rand_params():
+    penalty = np.random.choice(['l1', 'l2'])
+    fit_intercept = np.random.randint(2, dtype=bool)
+
+
 def df_artifact(ex, df, name=None):
     """Writes a DataFrame as an artifact (csv format)"""
     f_tmp = tempfile.NamedTemporaryFile(mode='w', delete=False)
