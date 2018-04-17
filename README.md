@@ -49,6 +49,10 @@ We can even use `print_config` to show a dry run of config and what's changed
 from the default
 ```python experiments/model_accuracy2.py print_config with seed=0 dataset.variant_split save_submission=True```
 
+#### Vary a bunch of stuff
+```python experiments/model_accuracy2.py with variant_rand_params save_submission=True dataset.variant_presplit```
+
+
 ### Running with a mongo observer
 0. Launch local mongo instance: `mongod`
 1. Run Experiment (result will be stored in `sacred` database in mongo): 
