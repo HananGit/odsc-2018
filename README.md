@@ -76,3 +76,23 @@ Start local Sacredboard server and connect to local MongoDB instance listening o
 - [sacred](https://github.com/IDSIA/sacred) [(pub)](http://ml.informatik.uni-freiburg.de/papers/17-SciPy-Sacred.pdf)
 - [sacredboard](https://github.com/chovanecm/sacredboard)
 - [Kaggle Titanic](https://www.kaggle.com/c/titanic)
+
+
+## Model Blending Workflow
+
+Run the following to simulate various experiments with random parameter search:
+```bash
+python experiments/model_accuracy2.py -m sacredblender \
+    with variant_rand_params dataset.variant_presplit save_submission=True
+```
+Note: we switched to a new database `sacredblender` in case there's any
+garbage in the `sacred` database. This is required because we've hardcoded
+the lookup to `sacredblender` database
+
+Now run an experiment that blends the top 3 runs based on holdout performance:
+```bash
+python experiments/model_accuracy2.py -m sacred \
+    with dataset.blend preprocess.variant_all save_submission=True
+```
+Note: we switched back to `sacred` database here. We also went with the
+default parameters for the meta blender model

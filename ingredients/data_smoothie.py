@@ -15,7 +15,7 @@ def gather_stage0_features(target):
     """Blend of predictions from our top 3 models"""
 
     client = MongoClient('localhost', 27017)
-    db = client.sacred
+    db = client['sacredblender']
     fs = gridfs.GridFS(db)
     collection = db.runs
 
