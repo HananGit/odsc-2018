@@ -96,3 +96,10 @@ python experiments/model_accuracy2.py -m sacred \
 ```
 Note: we switched back to `sacred` database here. We also went with the
 default parameters for the meta blender model
+
+You can always drop a database by doing the following:
+```bash
+mongo
+use sacredblender
+db.dropDatabase()
+```
