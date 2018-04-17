@@ -26,6 +26,16 @@ def cfg():
     save_submission = False
 
 
+def df_artifact(ex, df, name=None):
+    """Writes a DataFrame as an artifact (csv format)"""
+    f_tmp = tempfile.NamedTemporaryFile(mode='w', delete=False)
+    df.to_csv(f_tmp, header=True, index=True)
+    f_tmp.close()
+    ex.add_artifact(f_tmp.name, name=name)
+    os.remove(f_tmp.name)
+    return f_tmp.name
+
+
 @ex.automain
 def run(penalty, fit_intercept, save_probs, save_submission):
     data_d = load_data()
@@ -44,22 +54,19 @@ def run(penalty, fit_intercept, save_probs, save_submission):
 
     # Export predictions
     if save_probs:
-        f_tmp = tempfile.NamedTemporaryFile(delete=False)
-        np.save(f_tmp, pred_prob_test[:, 1])
-        f_tmp.close()
-        ex.add_artifact(f_tmp.name, name='predictions')
-        os.remove(f_tmp.name)
+        prob_df = pd.DataFrame(
+            pred_lbl_test,
+            index=pd.Index(x_test.index, name='PassengerId'),
+            columns=['pred'])
+        prob_df['Survived'] = y_test
+        df_artifact(ex, prob_df, 'predictions')
 
     if save_submission:
-        f_tmp = tempfile.NamedTemporaryFile(mode='w', delete=False)
         sub_df = pd.DataFrame(
             pred_lbl_test,
             index=pd.Index(x_test.index, name='PassengerId'),
             columns=['Survived'])
-        sub_df.to_csv(f_tmp, header=True, index=True)
-        f_tmp.close()
-        ex.add_artifact(f_tmp.name, name='submission')
-        os.remove(f_tmp.name)
+        df_artifact(ex, sub_df, 'submission')
 
     return score
 
