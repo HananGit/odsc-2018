@@ -71,13 +71,6 @@ db.runs.find().pretty()
 ### Sacredboard
 Start local Sacredboard server and connect to local MongoDB instance listening on 27017, database name `sacred`: `sacredboard -m sacred`
 
-
-# References
-- [sacred](https://github.com/IDSIA/sacred) [(pub)](http://ml.informatik.uni-freiburg.de/papers/17-SciPy-Sacred.pdf)
-- [sacredboard](https://github.com/chovanecm/sacredboard)
-- [Kaggle Titanic](https://www.kaggle.com/c/titanic)
-
-
 ## Model Blending Workflow
 
 Run the following to simulate various experiments with random parameter search:
@@ -103,3 +96,8 @@ mongo
 use sacredblender
 db.dropDatabase()
 ```
+
+# References
+- [sacred](https://github.com/IDSIA/sacred) [(pub)](http://ml.informatik.uni-freiburg.de/papers/17-SciPy-Sacred.pdf)
+- [sacredboard](https://github.com/chovanecm/sacredboard)
+- [Kaggle Titanic](https://www.kaggle.com/c/titanic)
