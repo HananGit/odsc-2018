@@ -11,7 +11,7 @@ def artifact_by_name(doc, name):
     return obj_id
 
 
-def gather_stage0_features(target):
+def gather_stage0_features(target_col):
     """Blend of predictions from our top 3 models"""
 
     client = MongoClient('localhost', 27017)
@@ -44,7 +44,9 @@ def gather_stage0_features(target):
     train_df = train_df.loc[:, ~train_df.columns.duplicated()]
     test_df = pd.concat(test_df_l, axis=1)
 
-    ret_d = {'train': (train_df.drop(target, axis=1), train_df[target]),
-             'test': (test_df.drop(target, axis=1), None)}
+    ret_d = {
+        'train': (train_df.drop(target_col, axis=1), train_df[target_col]),
+        'test': (test_df.drop(target_col, axis=1), None),
+    }
 
     return ret_d

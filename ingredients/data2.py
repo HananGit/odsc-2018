@@ -14,7 +14,8 @@ def cfg():
     path_train = 'data/train.csv'
     path_val = None
     path_test = 'data/test.csv'
-    target = 'Survived'
+    index_col = 'PassengerId'
+    target_col = 'Survived'
     split_size = None
 
     blended = False
@@ -61,25 +62,27 @@ def blend():
 
 
 @data_ingredient.capture
-def load_data(path_train, path_val, path_test, target, split_size=None,
-              blended=False,):
+def load_data(path_train, path_val, path_test,
+              index_col, target_col,
+              split_size=None,
+              blended=False, ):
 
     if blended:
-        return gather_stage0_features(target)
+        return gather_stage0_features(target_col)
 
-    train_df = pd.read_csv(path_train)
-    test_df = pd.read_csv(path_test)
-    feature_cols = [i for i in train_df.columns if i != target]
+    train_df = pd.read_csv(path_train, index_col=index_col)
+    test_df = pd.read_csv(path_test, index_col=index_col)
+    feature_cols = [i for i in train_df.columns if i != target_col]
 
     ret_d = {}
     if split_size is None or split_size == 1:
-        ret_d['train'] = (train_df[feature_cols], train_df[target])
+        ret_d['train'] = (train_df[feature_cols], train_df[target_col])
         if path_val:
-            val_df = pd.read_csv(path_val)
-            ret_d['val'] = (val_df[feature_cols], val_df[target])
+            val_df = pd.read_csv(path_val, index_col=index_col)
+            ret_d['val'] = (val_df[feature_cols], val_df[target_col])
     elif 0 < split_size < 1:
         x_train, x_val, y_train, y_val = train_test_split(
-            train_df[feature_cols], train_df[target],
+            train_df[feature_cols], train_df[target_col],
             train_size=split_size)
         ret_d['train'] = (x_train, y_train)
         ret_d['val'] = (x_val, y_val)
