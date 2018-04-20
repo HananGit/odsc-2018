@@ -20,7 +20,7 @@ vanilla_exp_space = {
     'titanic': {
         "fit_intercept": hp.choice('fit_intercept', [True, False]),
         "penalty": hp.choice('penalty', ["l1", "l2"]),
-        "C": hp.uniform('C', .1, 1000)
+        "C": hp.loguniform('C', .1, 1000)
     }
 }
 
@@ -43,7 +43,7 @@ stage0_space = {
 
     "fit_intercept": hp.choice('fit_intercept', [True, False]),
     "penalty": hp.choice('penalty', ["l1", "l2"]),
-    "C": hp.uniform('C', .01, 1000),
+    "C": hp.loguniform('C', .01, 1000),
     "save_submission": True
 
 }
@@ -69,7 +69,7 @@ stage0_space_multiple_models = {
     # LR PARAMS
     "lr_fit_intercept": hp.choice('lr_fit_intercept', [True, False]),
     "lr_penalty": hp.choice('lr_penalty', ["l1", "l2"]),
-    "lr_c": hp.uniform('lr_c', .01, 1000),
+    "lr_c": hp.loguniform('lr_c', .01, 1000),
 
     # RF Params
     "rf_n_estimators": hp.choice('rf_n_estimators', [10, 15, 20, 100]),

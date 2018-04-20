@@ -69,31 +69,19 @@ def gather_experiments_and_configs(experiment_file_name):
 
 if __name__ == '__main__':
     """
-    Runs a series of test using Hyperopt to determine which parameters are most important
-    All tests will be logged using Sacred - if the sacred database is set up correctly, otherwise it will simply run
-    To run pass in the number of hyperopt runs, the mongo db address and name
-
-    Generic:
-<<<<<<< HEAD
-        python hpo/hyperopt_hpo.py NUM_RUNS MONGO_HOST:MONGO_PORT MONGO_SACRED_COLLECTION EXPERIMENT_FILE_NAME
-
-    For 5 tests to local mongo instance with collection named sacred:
-        python hpo/hyperopt_hpo.py 5 127.0.0.1:27017 sacredblender model_accuracy
-=======
-        python hpo/hyperopt_hpo.py NUM_RUNS MONGO_HOST:MONGO_PORT MONGO_SACRED_COLLECTION
-
-    For 5 tests to local mongo instance with collection named sacred:
-        python experiments/hyperopt_experiment.py 5 127.0.0.1:27017 sacred
->>>>>>> 04b60841069e1011e0a6c0d323f7e9db887be9c3
-
+    For 3 hyperopt runs of model_accuracy3 to local mongo instance, run:
+        python hpo/hyperopt_hpo.py --num-runs 3 --experiment-file-name model_accuracy3
     """
 
-    parser = argparse.ArgumentParser(description="Titanic Hyperopt Tests logging to Sacred")
-    parser.add_argument("num_runs", type=int, help="Number of Hyperopt Runs")
-    parser.add_argument("mongo_db_address", type=str, help="Address of the Mongo DB")
-    parser.add_argument("mongo_db_name", type=str, help="Name of the Mongo DB")
-    parser.add_argument("experiment_file_name", type=str,
-                        help="Which hpo params to used. Add new in hpo/hyperopt_hpo_configs.py")
+    parser = argparse.ArgumentParser(description="Logging Hyperopt Tests to Sacred")
+    parser.add_argument("--num-runs", nargs='?', default=10, type=int, help="Number of Hyperopt Runs. Default is 10")
+    parser.add_argument("--mongo-db-address", nargs='?', default='127.0.0.1:27017',
+                        type=str, help="Address of the Mongo DB. Default is 127.0.0.1:27017")
+    parser.add_argument("--mongo-db-name", nargs='?', default='sacredblender',
+                        type=str, help="Name of the Mongo DB. Default is sacredblender")
+    parser.add_argument("--experiment-file-name", nargs='?', default='model_accuracy', type=str,
+                        help="Which hpo params to used. Add new in hpo/hyperopt_hpo_configs.py. "
+                             "Default is model_accuracy")
 
     global parse_args
     parse_args = parser.parse_args()

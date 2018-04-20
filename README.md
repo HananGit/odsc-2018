@@ -110,19 +110,40 @@ included and appropriately mapped in [gather_experiments_and_configs](hpo/hypero
 
 ### Run 
 
-hyperopt parameter search run command: 
+#### Usage
 
-`python hpo/hyperopt_hpo.py NUM_RUNS MONGO_HOST:MONGO_PORT MONGO_DB EXPERIMENT_FILE_NAME`
+```bash
+usage: hyperopt_hpo.py [-h] [--num-runs [NUM_RUNS]]
+                       [--mongo-db-address [MONGO_DB_ADDRESS]]
+                       [--mongo-db-name [MONGO_DB_NAME]]
+                       [--experiment-file-name [EXPERIMENT_FILE_NAME]]
 
-`NUM_RUNS` - Number of hyperopt trials 
-`MONGO_HOST:MONGO_PORT` - Should be `127.0.0.1:27017` if running locally
-`MONGO_DB` - Should be the `sacred` or `sacredblender` collection
-`EXPERIMENT_FILE_NAME` - Key must exist in [exp_and_configs](hpo/hyperopt_hpo.py) dict
+Logging Hyperopt Tests to Sacred
 
-`python hpo/hyperopt_hpo.py 5 127.0.0.1:27017 sacredblender model_accuracy`
+optional arguments:
+  -h, --help            show this help message and exit
+  --num-runs [NUM_RUNS]
+                        Number of Hyperopt Runs. Default is 10
+  --mongo-db-address [MONGO_DB_ADDRESS]
+                        Address of the Mongo DB. Default is 127.0.0.1:27017
+  --mongo-db-name [MONGO_DB_NAME]
+                        Name of the Mongo DB. Default is sacredblender
+  --experiment-file-name [EXPERIMENT_FILE_NAME]
+                        Which hpo params to used. Add new in
+                        hpo/hyperopt_hpo_configs.py. Default is model_accuracy
+```
 
-Note that we are writing to `sacredblender` here. So, the blended model could be created after running HPO and writing
-out the results to `sacredblender`.
+For ```--experiment-file-name``` - Key must exist in [exp_and_configs](hpo/hyperopt_hpo.py) dict
+
+#### Example
+
+To do `3` hyperopt runs of the sacred experiment in `experiments/model_accuracy3` to the default local mongo instance, 
+`sacredblender` collection. 
+
+`python hpo/hyperopt_hpo.py --num-runs 3 --experiment-file-name model_accuracy3` 
+
+Note that we are writing by default to `sacredblender` here. The blended model can be created after running HPO
+and selecting the 3 best models to be blended.
 
 # References
 - [sacred](https://github.com/IDSIA/sacred) [(pub)](http://ml.informatik.uni-freiburg.de/papers/17-SciPy-Sacred.pdf)
