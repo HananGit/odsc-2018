@@ -3,6 +3,7 @@ sacred-demo*
 .idea/
 saved/*
 !saved/.gitkeep
+data/gen_sub*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
