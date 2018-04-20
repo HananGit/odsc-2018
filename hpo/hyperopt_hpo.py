@@ -59,19 +59,13 @@ def gather_experiments_and_configs(experiment_file_name):
 
     from hpo.hyperopt_hpo_configs import vanilla_exp_space, stage0_space, stage0_space_multiple_models
 
-    all_experiments = {
-        'model_accuracy': vanilla,
-        'model_accuracy2': model_params,
-        'model_accuracy3': multiple_models,
+    exp_and_configs = {
+        'model_accuracy': [vanilla, vanilla_exp_space],
+        'model_accuracy2': [model_params, stage0_space],
+        'model_accuracy3': [multiple_models, stage0_space_multiple_models],
     }
 
-    hpo_params = {
-        "model_accuracy": vanilla_exp_space,
-        "model_accuracy2": stage0_space,
-        "model_accuracy3": stage0_space_multiple_models,
-    }
-
-    return all_experiments[experiment_file_name], hpo_params[experiment_file_name]
+    return exp_and_configs[experiment_file_name][0], exp_and_configs[experiment_file_name][1]
 
 
 if __name__ == '__main__':
@@ -84,7 +78,7 @@ if __name__ == '__main__':
         python hpo/hyperopt_hpo.py NUM_RUNS MONGO_HOST:MONGO_PORT MONGO_SACRED_COLLECTION EXPERIMENT_FILE_NAME
 
     For 5 tests to local mongo instance with collection named sacred:
-        python hpo/hyperopt_hpo.py 5 127.0.0.1:27017 sacred model_accuracy
+        python hpo/hyperopt_hpo.py 5 127.0.0.1:27017 sacredblender model_accuracy
 
     """
 
