@@ -3,7 +3,6 @@ from sacred.initialize import Scaffold
 import argparse
 from hyperopt import fmin, tpe, hp, Trials
 
-
 class HyperoptHPO(object):
     """
     Runs a hyperopt experiment over a Sacred Experiment
@@ -75,10 +74,17 @@ if __name__ == '__main__':
     To run pass in the number of hyperopt runs, the mongo db address and name
 
     Generic:
+<<<<<<< HEAD
         python hpo/hyperopt_hpo.py NUM_RUNS MONGO_HOST:MONGO_PORT MONGO_SACRED_COLLECTION EXPERIMENT_FILE_NAME
 
     For 5 tests to local mongo instance with collection named sacred:
         python hpo/hyperopt_hpo.py 5 127.0.0.1:27017 sacredblender model_accuracy
+=======
+        python hpo/hyperopt_hpo.py NUM_RUNS MONGO_HOST:MONGO_PORT MONGO_SACRED_COLLECTION
+
+    For 5 tests to local mongo instance with collection named sacred:
+        python experiments/hyperopt_experiment.py 5 127.0.0.1:27017 sacred
+>>>>>>> 04b60841069e1011e0a6c0d323f7e9db887be9c3
 
     """
 
