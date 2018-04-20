@@ -3,14 +3,14 @@ import numpy as np
 import pandas as pd
 import tempfile
 from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, roc_auc_score
 from sacred import Experiment
 from ingredients.data2 import data_ingredient, load_data
 from ingredients.preproc import preprocess_ingredient, preprocess_data
 
 
-ex = Experiment('titantic',
+ex = Experiment('titanic',
                 ingredients=[data_ingredient, preprocess_ingredient])
 
 
@@ -21,19 +21,17 @@ def cfg():
     http://scikit-learn.org/stable/modules/model_evaluation.html#scoring-parameter
     Make sure to turn on `predict_proba` if the metric requires probabilities
     """
-    model_type = "lr"  # LogisticRegression or SVM
+    model_type = "lr"  # LogisticRegression
 
     # LR Params
     lr_penalty = 'l2'
     lr_fit_intercept = False
     lr_c = 1.0
 
-    # SVM Params
-    svm_c = 1.0
-    svm_kernel = 'rbf'  # ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’
-    svm_degree = 3
-    svm_gamma = 'rbf'  # ‘rbf’, ‘poly’, ‘sigmoid’, 'auto'
-    svm_probability = True
+    # RF Params
+    rf_n_estimators = 10
+    rf_max_depth = None
+    rf_min_samples_split = 2
 
     save_probs = True
     save_submission = False
@@ -42,16 +40,15 @@ def cfg():
 @ex.named_config
 def variant_rand_params():
 
-    model_type = np.random.choice(['lr','svm'])
+    model_type = np.random.choice(['lr', 'rf'])
 
     lr_penalty = np.random.choice(['l1', 'l2'])
     lr_fit_intercept = np.random.randint(2, dtype=bool)
     lr_c = np.exp(np.random.randn() * 5)
 
-    svm_kernel = 'linear'  # np.random.choice(['linear', 'poly', 'sigmoid', 'rbf'])
-    svm_gamma = 'auto'  # np.random.choice(['auto', 'poly', 'sigmoid', 'rbf'])
-    svm_degree = np.random.randint(3) + 1
-    svm_c = np.exp(np.random.randn() * 5)
+    rf_n_estimators = np.random.choice([10, 15, 20, 100])
+    rf_max_depth = np.random.choice([None, 5, 10])
+    rf_min_samples_split = np.random.choice([2, 5, 10])
 
 
 def df_artifact(ex, df, name=None):
@@ -68,11 +65,9 @@ def df_artifact(ex, df, name=None):
 def run(lr_penalty,
         lr_fit_intercept,
         lr_c,
-        svm_kernel,
-        svm_gamma,
-        svm_degree,
-        svm_c,
-        svm_probability,
+        rf_n_estimators,
+        rf_max_depth,
+        rf_min_samples_split,
         model_type,
         save_probs,
         save_submission):
@@ -87,24 +82,21 @@ def run(lr_penalty,
         clf = LogisticRegression(
             penalty=lr_penalty, fit_intercept=lr_fit_intercept, C=lr_c
         )
-    elif model_type == 'svm':
-        clf = SVC(
-            C=svm_c, kernel=svm_kernel, gamma=svm_gamma,
-            degree=svm_degree, probability=svm_probability
+    elif model_type == 'rf':
+        clf = RandomForestClassifier(
+            n_estimators=rf_n_estimators,
+            max_depth=rf_max_depth,
+            min_samples_split=rf_min_samples_split
         )
     else:
-        print("model type " + model_type + " not defined")
+        raise ValueError("Given model_type is not defined: ", model_type)
 
-    try:
-        clf.fit(preprocess_data(x_train), y_train)
-    except TypeError:
-        print("kernel: " + str(svm_kernel))
-        print("degree: " + str(svm_degree))
-        print("gamma: " + str(svm_gamma))
+    clf.fit(preprocess_data(x_train), y_train)
 
     # Test Predictions
     if x_test is not None:
         pred_prob_test = clf.predict_proba(preprocess_data(x_test))
+
         pred_lbl_test = pred_prob_test.argmax(axis=1)
 
         # Export prob predictions
@@ -146,4 +138,3 @@ def run(lr_penalty,
     else:
 
         return None
-

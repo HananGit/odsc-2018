@@ -1,12 +1,7 @@
-from experiments.model_accuracy import ex as titanic_experiment
-from sacred import Experiment
 from sacred.observers import MongoObserver
 from sacred.initialize import Scaffold
 import argparse
 from hyperopt import fmin, tpe, hp, Trials
-
-
-titanic = 'titantic'  # Misspelled titanic in model_accuracy
 
 
 class HyperoptHPO(object):
@@ -31,25 +26,17 @@ class HyperoptHPO(object):
         self.mongo_db = command_line_args.mongo_db_name
         self.num_runs = command_line_args.num_runs
         self.param_space = param_space
-
-        # initialize Experiment
-        self.hyperopt_exp = Experiment('Hyperopt',
-                                       ingredients=[self.base_experiment])
-        self.hyperopt_exp.observers.append(
-            MongoObserver.create(url=self.mongo_url, db_name=self.mongo_db))
+        self.base_experiment.observers.append(MongoObserver.create(url=self.mongo_url, db_name=self.mongo_db))
 
     def objective(self, experiment_args):
         self.experiment_config = experiment_args
         run_obj = self.base_experiment.run(
             config_updates=self.experiment_config)
 
-        # print("Config: ",r.config) #sanity check
-
         return - run_obj.result
 
     def run_hyperopt(self):
         """
-        Replaces run_titanic_hyperopt
         :return: trials: performance on each trial run, and optimal_run: the best run
         """
 
@@ -65,6 +52,28 @@ class HyperoptHPO(object):
         return trials, optimal_run
 
 
+def gather_experiments_and_configs(experiment_file_name):
+    from experiments.model_accuracy import ex as vanilla
+    from experiments.model_accuracy2 import ex as model_params
+    from experiments.model_accuracy3 import ex as multiple_models
+
+    from hpo.hyperopt_hpo_configs import vanilla_exp_space, stage0_space, stage0_space_multiple_models
+
+    all_experiments = {
+        'model_accuracy': vanilla,
+        'model_accuracy2': model_params,
+        'model_accuracy3': multiple_models,
+    }
+
+    hpo_params = {
+        "model_accuracy": vanilla_exp_space,
+        "model_accuracy2": stage0_space,
+        "model_accuracy3": stage0_space_multiple_models,
+    }
+
+    return all_experiments[experiment_file_name], hpo_params[experiment_file_name]
+
+
 if __name__ == '__main__':
     """
     Runs a series of test using Hyperopt to determine which parameters are most important
@@ -72,10 +81,10 @@ if __name__ == '__main__':
     To run pass in the number of hyperopt runs, the mongo db address and name
 
     Generic:
-        python hpo/hyperopt_hpo.py NUM_RUNS MONGO_HOST:MONGO_PORT MONGO_SACRED_COLLECTION
+        python hpo/hyperopt_hpo.py NUM_RUNS MONGO_HOST:MONGO_PORT MONGO_SACRED_COLLECTION EXPERIMENT_FILE_NAME
 
     For 5 tests to local mongo instance with collection named sacred:
-        python experiments/hyperopt_experiment.py 5 127.0.0.1:27017 sacred
+        python hpo/hyperopt_hpo.py 5 127.0.0.1:27017 sacred model_accuracy
 
     """
 
@@ -83,6 +92,8 @@ if __name__ == '__main__':
     parser.add_argument("num_runs", type=int, help="Number of Hyperopt Runs")
     parser.add_argument("mongo_db_address", type=str, help="Address of the Mongo DB")
     parser.add_argument("mongo_db_name", type=str, help="Name of the Mongo DB")
+    parser.add_argument("experiment_file_name", type=str,
+                        help="Which hpo params to used. Add new in hpo/hyperopt_hpo_configs.py")
 
     global parse_args
     parse_args = parser.parse_args()
@@ -95,30 +106,9 @@ if __name__ == '__main__':
         pass
     Scaffold._warn_about_suspicious_changes = noop
 
-    # Parameters for each Ingredient
-    space = {
-        # Set Seed to 0 to make consistent for all HPO runs
-        "seed": 0,
+    base_experiment, space = gather_experiments_and_configs(parse_args.experiment_file_name)
 
-        # Data Ingredient: train_dataset
-        'train_dataset': {
-            "filename": "data/train.csv",
-            "target": 'Survived',
-            "split_size": .75
-        },
-        # Preprocess Ingredient: preprocess
-        'preprocess': {
-            "features": hp.choice("features", [['Fare', 'SibSp'], ['Fare', 'SibSp', 'Parch']]),
-        },
-
-        # Experiment: titanic
-        titanic: {
-            "fit_intercept": hp.choice('fit_intercept', [True, False]),
-            "penalty": hp.choice('penalty', ["l1", "l2"])
-        }
-    }
-
-    hyperopt_exps = HyperoptHPO(base_experiment=titanic_experiment,
+    hyperopt_exps = HyperoptHPO(base_experiment=base_experiment,
                                 command_line_args=parse_args,
                                 param_space=space)
 
