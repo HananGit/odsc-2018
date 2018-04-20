@@ -11,7 +11,7 @@ from sacred.observers import MongoObserver
 from sacred.initialize import Scaffold
 import argparse
 
-titanic = 'titantic'  # Misspelled titanic in model_accuracy
+titanic = 'titanic'  # Misspelled titanic in model_accuracy
 
 
 def objective(titanic_args):
