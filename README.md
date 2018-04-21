@@ -52,6 +52,15 @@ from the default
 #### Vary a bunch of stuff
 ```python experiments/model_accuracy2.py with variant_rand_params save_submission=True dataset.variant_presplit```
 
+### Running an experiment and logging metrics
+
+Using Sacred's [Metrics API](http://sacred.readthedocs.io/en/latest/collected_information.html?highlight=track%20metrics#metrics-api)
+, we can track the performance of a model with each training step. 
+
+In [track_metrics.py](experiments/track_metrics.py), we run [StochasticGradientDescent](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDClassifier.html) 
+and track training/validation performance over `n_epochs`.
+
+`python experiments/track_metrics.py -m sacred with n_epochs=10 seed=0`
 
 ### Running with a mongo observer
 0. Launch local mongo instance: `mongod`
