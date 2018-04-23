@@ -11,7 +11,7 @@ def artifact_by_name(doc, name):
     return obj_id
 
 
-def gather_stage0_features(target_col):
+def gather_stage1_features(target_col):
     """Blend of predictions from our top 3 models"""
 
     client = MongoClient('localhost', 27017)

@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sacred import Ingredient
-from ingredients.data_smoothie import gather_stage0_features
+from ingredients.data_smoothie import gather_stage1_features
 
 
 data_ingredient = Ingredient('dataset')
@@ -68,7 +68,7 @@ def load_data(path_train, path_val, path_test,
               blended=False, ):
 
     if blended:
-        return gather_stage0_features(target_col)
+        return gather_stage1_features(target_col)
 
     train_df = pd.read_csv(path_train, index_col=index_col)
     test_df = pd.read_csv(path_test, index_col=index_col)
