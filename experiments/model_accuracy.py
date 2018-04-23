@@ -4,7 +4,7 @@ from ingredients.data import train_data_ingredient, load_data
 from ingredients.preproc import preprocess_ingredient, preprocess_data
 
 
-ex = Experiment('titantic',
+ex = Experiment('titanic',
                 ingredients=[train_data_ingredient, preprocess_ingredient])
 
 
