@@ -57,7 +57,7 @@ from the default
 Using Sacred's [Metrics API](http://sacred.readthedocs.io/en/latest/collected_information.html?highlight=track%20metrics#metrics-api)
 , we can track the performance of a model with each training step. 
 
-In [track_metrics.py](experiments/track_metrics.py), we run [StochasticGradientDescent](http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDClassifier.html) 
+In [track_metrics.py](experiments/track_metrics.py), we run [MLPClassifier](http://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html) 
 and track training/validation performance over `n_epochs`.
 
 `python experiments/track_metrics.py -m sacred with n_epochs=10 seed=0`
