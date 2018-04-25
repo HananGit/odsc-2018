@@ -17,11 +17,10 @@ vanilla_exp_space = {
     },
 
     # Experiment: titanic
-    'titanic': {
-        "fit_intercept": hp.choice('fit_intercept', [True, False]),
-        "penalty": hp.choice('penalty', ["l1", "l2"]),
-        "C": hp.loguniform('C', .1, 1000)
-    }
+    "fit_intercept": hp.choice('fit_intercept', [True, False]),
+    "penalty": hp.choice('penalty', ["l1", "l2"]),
+    "C": hp.loguniform('C', -5, 5)
+
 }
 
 # HPO params for experiments/model_accuracy2.py
@@ -40,10 +39,9 @@ stage0_space = {
     },
 
     # Experiment: titanic
-
     "fit_intercept": hp.choice('fit_intercept', [True, False]),
     "penalty": hp.choice('penalty', ["l1", "l2"]),
-    "C": hp.loguniform('C', .01, 1000),
+    "C": hp.loguniform('C', -5, 5),
     "save_submission": True
 
 }
@@ -69,7 +67,7 @@ stage0_space_multiple_models = {
     # LR PARAMS
     "lr_fit_intercept": hp.choice('lr_fit_intercept', [True, False]),
     "lr_penalty": hp.choice('lr_penalty', ["l1", "l2"]),
-    "lr_c": hp.loguniform('lr_c', .01, 1000),
+    "lr_c": hp.loguniform('lr_c', -5, 5),
 
     # RF Params
     "rf_n_estimators": hp.choice('rf_n_estimators', [10, 15, 20, 100]),
